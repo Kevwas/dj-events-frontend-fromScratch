@@ -10,7 +10,7 @@ export default function HomePage({ events }) {
       {events.length === 0 && <h3>No events to show</h3>}
 
       {events.map((evt) => (
-        <EventItem key={evt.id} evt={evt} />
+        <EventItem key={evt.id} evt={evt.attributes} />
       ))}
 
       {events.length > 0 && (
@@ -24,14 +24,15 @@ export default function HomePage({ events }) {
 
 // export async function getServerSideProps() {
 export async function getStaticProps() {
-  const res = await fetch(`${API_URL}/api/events`);
-  const events = await res.json();
+  const res = await fetch(`${API_URL}/api/events?&sort=date:ASC&pagination[page]=1&pagination[pageSize]=3&populate=*`);
+  const resJson = await res.json();
+  const events = resJson.data;
 
   // return {
   //   props: { events },
   // };
   return {
-    props: { events: events.slice(0, 3) },
+    props: { events },
     revalidate: 1,
   };
 }
