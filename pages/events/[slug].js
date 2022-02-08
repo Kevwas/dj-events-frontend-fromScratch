@@ -25,15 +25,15 @@ export default function EventPage({ evt }) {
         </div>
 
         <span>
-          {new Date(evt.date).toLocaleDateString("en-US")} at {evt.time}
+          {new Date(evt.attributes.date).toLocaleDateString("en-US")} at {evt.attributes.time}
         </span>
-        <h1>{evt.name}</h1>
+        <h1>{evt.attributes.name}</h1>
         {/* <ToastContainer /> */}
-        {evt.image && (
+        {evt.attributes.image && (
           <div className={styles.image}>
             <Image
               // src={evt.image.formats.medium.url}
-              src={evt.image}
+              src={evt.attributes.image.data.attributes.formats.medium.url}
               width={960}
               height={600}
               alt="Image of the event"
@@ -42,11 +42,11 @@ export default function EventPage({ evt }) {
         )}
 
         <h3>Performers:</h3>
-        <p>{evt.performers}</p>
+        <p>{evt.attributes.performers}</p>
         <h3>Description:</h3>
-        <p>{evt.description}</p>
-        <h3>Venue: {evt.venue}</h3>
-        <p>{evt.address}</p>
+        <p>{evt.attributes.description}</p>
+        <h3>Venue: {evt.attributes.venue}</h3>
+        <p>{evt.attributes.address}</p>
 
         {/* <EventMap evt={evt} /> */}
 
@@ -60,10 +60,11 @@ export default function EventPage({ evt }) {
 
 export async function getStaticPaths() {
   const res = await fetch(`${API_URL}/api/events`);
-  const events = await res.json();
+  const resJson = await res.json();
+  const events = resJson.data;
 
   const paths = events.map((evt) => ({
-    params: { slug: evt.slug },
+    params: { slug: evt.attributes.slug },
   }));
 
   return {
@@ -73,12 +74,13 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps({ params: { slug } }) {
-  const res = await fetch(`${API_URL}/api/events/${slug}`);
-  const events = await res.json();
+  const res = await fetch(`${API_URL}/api/events/?slug=${slug}&populate=*`);
+  const resJson = await res.json();
+  const event = resJson.data;
 
   return {
     props: {
-      evt: events[0],
+      evt: event[0],
     },
     revalidate: 1,
   };
